@@ -1,0 +1,21 @@
+Artificial Intelligence has become an important technology for building
+modern applications. Large Language Models (LLMs) can understand and
+generate human-like text, but they can sometimes produce incorrect or
+outdated information.
+
+Retrieval-Augmented Generation (RAG) helps solve this problem by allowing
+an LLM to retrieve relevant information from external documents before
+generating an answer. A typical RAG pipeline includes document loading,
+text splitting, embeddings, a vector store, retrieval, and generation.
+
+APIs allow applications to communicate with AI models programmatically.
+FastAPI can be used to build backend APIs, while Streamlit can be used to
+create simple interactive AI applications.
+
+Prompt engineering is another important skill when working with LLMs.
+Clear and specific prompts can help an AI model produce more useful and
+reliable responses.
+
+These technologies can be combined to build applications such as document
+question-answering systems, AI chat interfaces, and prompt enhancement
+tools.
