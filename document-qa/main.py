@@ -1,10 +1,33 @@
-# Simple Document Q&A Application
+import os
+from dotenv import load_dotenv
+from openai import OpenAI
+import chromadb
 
+# Load API key
+load_dotenv()
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# Load document
 with open("sample.txt", "r") as file:
     document = file.read()
 
+# Create ChromaDB database
+chroma_client = chromadb.PersistentClient(path="chroma_db")
+
+collection = chroma_client.get_or_create_collection(
+    name="documents"
+)
+
+# Store document
+collection.upsert(
+    ids=["document1"],
+    documents=[document]
+)
+
 print("Document loaded successfully.")
-print("\nAsk a question about the document.")
+print("RAG system is ready.")
+print("Ask questions about the document.")
 print("Type 'exit' to quit.\n")
 
 while True:
@@ -14,19 +37,33 @@ while True:
         print("Goodbye!")
         break
 
-    question = question.lower()
+    # Retrieve relevant document content
+    results = collection.query(
+        query_texts=[question],
+        n_results=1
+    )
 
-    if "office" in question or "located" in question:
-        print("Answer: The office is located in Bengaluru.")
+    context = results["documents"][0][0]
 
-    elif "working" in question or "hours" in question:
-        print("Answer: Working hours are from 9 AM to 6 PM, Monday to Friday.")
+    # Ask the LLM using retrieved context
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "Answer the user's question using only the provided "
+                    "document context. If the answer is not in the context, "
+                    "say that the information was not found in the document."
+                )
+            },
+            {
+                "role": "user",
+                "content": f"Document context:\n{context}\n\nQuestion: {question}"
+            }
+        ]
+    )
 
-    elif "leave" in question:
-        print("Answer: Employees receive 12 days of annual leave every year.")
+    answer = response.choices[0].message.content
 
-    elif "insurance" in question:
-        print("Answer: The company provides health insurance to employees.")
-
-    else:
-        print("Answer: I couldn't find that information in the document.")
+    print(f"\nAnswer: {answer}\n")
